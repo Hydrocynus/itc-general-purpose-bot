@@ -16,6 +16,6 @@ module.exports = {
 			})
 		});
 
-		console.log(`Mod answered with status code ${statusCode}: ${body}`);
+		console.log(`Mod answered with status code ${statusCode}:`, body);
 	}
 }
