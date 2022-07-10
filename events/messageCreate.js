@@ -1,4 +1,4 @@
-const { minecraft: { channelId, modApi } } = require('../config.json');
+const { minecraft: { chat: { channelId }, modApi } } = require('../config.json');
 const { request } = require('undici');
 
 module.exports = {
