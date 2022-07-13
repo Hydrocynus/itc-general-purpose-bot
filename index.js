@@ -43,6 +43,11 @@
 	const Playerlist = require('./classes/Playerlist.js');
 	const playerlist = new Playerlist(client);
 
+	// === Chat ===
+
+	const MCChat = require('./classes/MCChat.js');
+	const mcchat = new MCChat(client);
+
 	// === REST ===
 
 	const express = require('express');
