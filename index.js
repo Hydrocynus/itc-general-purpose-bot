@@ -1,7 +1,8 @@
-// === General ===
-
-// === Bot ===
 (async () => {
+	// === General ===
+
+	// === Bot ===
+
 	const fs = require('node:fs');
 	const path = require('node:path');
 	const { Client, Collection, Intents } = require('discord.js');
@@ -37,19 +38,24 @@
 
 	await client.login(token);
 
+	// === Playerlist ===
+
+	const Playerlist = require('./classes/Playerlist.js');
+	const playerlist = new Playerlist(client);
+
 	// === REST ===
 
-	const express = require('express')
+	const express = require('express');
 
-	const app = express()
-	app.use(express.json())
+	const app = express();
+	app.use(express.json());
 
 	app.post('/', (req, res) => {
 		console.log(req.body)
 		res.send('ok')
-	})
+	});
 
 	app.listen(3000, () => {
 		console.log('Listening on port 3000!')
-	})
-})()
+	});
+})();
