@@ -26,7 +26,8 @@ class Playerlist {
     this.message = await this.channel.messages.fetch(plcfg.messageId);
     if (!this.message) {
       this.message = await this.webhook.send({
-        embeds: [{ title: "Loading...", username: "Jürgen" }]
+        embeds: [{ title: "Loading..." }],
+        username: "Jürgen"
       });
       plcfg.messageId = this.message.id;
     }
@@ -36,7 +37,7 @@ class Playerlist {
   }
 
   async display () {
-    const list = this.list.map(p => await this.client.users.fetch(p) || p);
+    const list = this.list.map(p => await this.client.users.fetch(p) ? `<@${p}>` : p);
     const embeds = {
       title: `Players online: ${list.length}/${this.maxplayers}`,
       description: list.join("\n"),
