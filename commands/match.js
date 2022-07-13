@@ -1,6 +1,6 @@
 const { SlashCommandBuilder } = require('@discordjs/builders');
 const { request } = require('undici');
-const { minecraft: { modApi } } = require('../config.json');
+const { minecraft: { api: { ip, port }}} = require('../config.json');
 
 module.exports = {
 	data: new SlashCommandBuilder()
@@ -10,11 +10,7 @@ module.exports = {
     .addUserOption(option => option.setName('discorduser').setRequired(true).setDescription('The Discord user to match')),
 	async execute(interaction) {
 		await interaction.deferReply('Matching Minecraft username to Discord user ID...');
-		console.log("match:", {
-			minecraftUserName: interaction.options.getString('mcusername'),
-			discordUserID: interaction.options.getUser('discorduser')?.id
-		});
-		const uri = modApi + "/playerlist/match";
+		const uri = `${ip}:${port}/playerlist/match`;
 		try {
 			const { statusCode, headers, body} = await request(uri, {
 				method: "POST",

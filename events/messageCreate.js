@@ -1,4 +1,4 @@
-const { minecraft: { chat: { channelId }, modApi } } = require('../config.json');
+const { minecraft: { chat: { channelId }, api: { ip, port } } } = require('../config.json');
 const { request } = require('undici');
 
 module.exports = {
@@ -9,7 +9,7 @@ module.exports = {
 		console.log(`${message.author.tag} said: ${message.content}`);
 
 		try {
-			const { statusCode, headers, body} = await request(modApi + "/message", {
+			const { statusCode, headers, body} = await request(`${ip}:${port}/message`, {
 				method: "POST",
 				body: JSON.stringify({
 					user: message.author.id,
