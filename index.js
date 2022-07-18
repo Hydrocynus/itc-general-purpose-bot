@@ -60,6 +60,17 @@
 		res.send('ok')
 	});
 
+	app.put('/playerlist', (req, res) => {
+		playerlist.list = req.body.players;
+		res.status(204).send();
+	});
+
+	app.post('/message', (req, res) => {
+		console.log("POST /message", req.body);
+		mcchat.add(req.body.user, req.body.name, req.body.text);
+		res.status(204).send();
+	});
+
 	app.listen(3000, () => {
 		console.log('Listening on port 3000!')
 	});
