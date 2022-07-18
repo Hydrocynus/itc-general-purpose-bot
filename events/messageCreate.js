@@ -5,6 +5,7 @@ module.exports = {
 	name: 'messageCreate',
 	execute: async message => {
 		if (message.channelId !== channelId) return;
+		if (message.author.bot) return;
 
 		console.log(`${message.author.tag} said: ${message.content}`);
 
@@ -13,6 +14,7 @@ module.exports = {
 				method: "POST",
 				body: JSON.stringify({
 					user: message.author.id,
+					name: message.author.displayName,
 					text: message.content
 				})
 			});
