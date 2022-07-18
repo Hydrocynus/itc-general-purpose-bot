@@ -1,12 +1,15 @@
 const config = require('../config.json');
 const fs = require('fs');
+const { request } = require('undici');
+const { MessageActionRow, MessageButton } = require('discord.js');
 
 class Playerlist {
 
   constructor (client) {
     this.client = client;
-    this._list = new Set();
+    this._list = [];
     this.ip = config.minecraft.api.ip;
+    this.mcport = config.minecraft.api.mcport || 25565;
     this.maxplayers = "?";
     this.init();
   }
@@ -16,34 +19,65 @@ class Playerlist {
 
     this.channel = await this.client.channels.fetch(plcfg.channelId);
 
-    this.webhook = await this.client.fetchWebhook(plcfg.webhook.id, plcfg.webhook.token);
-    if (!this.webhook) {
-      this.webhook = await channel.createWebhook({ name: "Playerlist" });
+    try {
+      this.webhook = await this.client.fetchWebhook(plcfg.webhook.id, plcfg.webhook.token);
+    } catch (e) {
+      this.webhook = await this.channel.createWebhook("Playerlist");
       plcfg.webhook.id = this.webhook.id;
       plcfg.webhook.token = this.webhook.token;
     }
 
-    this.message = await this.channel.messages.fetch(plcfg.messageId);
-    if (!this.message) {
+    try {
+      this.message = plcfg.messageId ? await this.channel.messages.fetch(plcfg.messageId) : null;
+    } catch (e) {
       this.message = await this.webhook.send({
         embeds: [{ title: "Loading..." }],
-        username: "Jürgen"
+        username: "Jürgen",
+        avatarURL: this.client.user.displayAvatarURL()
       });
       plcfg.messageId = this.message.id;
     }
 
-    fs.writeFileSync("../config.json", JSON.stringify(config, null, 2));
+    fs.writeFileSync("./config.json", JSON.stringify(config, null, 2));
     this.fetch();
   }
 
   async display () {
-    const list = this.list.map(p => await this.client.users.fetch(p) ? `<@${p}>` : p);
+    const userManager = this.client.users;
+    const list = [];
+    const toMatch = [];
+    for (let p of this._list) {
+      let isDCUser;
+      try { isDCUser = await userManager.fetch(p) }
+      catch (e) { isDCUser = false }
+      list.push(isDCUser ? `<@${p}>` : p);
+      if (!isDCUser) toMatch.push(p);
+    }
+
+    const portString = this.mcport == 25565 ? "" : `:${this.mcport}`;
+
     const embeds = {
       title: `Players online: ${list.length}/${this.maxplayers}`,
       description: list.join("\n"),
-      footer: { text: this.ip }
+      footer: { text: `${this.ip}${portString}` }
     };
-    await this.message.edit({ embeds });
+    console.debug("Display playerlist:", embeds);
+
+    const components = [];
+    if (toMatch.length > 0) {
+      components.push(
+        new MessageActionRow().addComponents(new MessageButton()
+          .setStyle("PRIMARY")
+          .setLabel("Match Players")
+          .setCustomId("Playerlist.matchPlayers")
+        )
+      )
+    }
+
+    await this.webhook.editMessage(this.message, {
+      embeds: [embeds],
+      components: components
+    });
   }
 
   set list (list) {
@@ -56,10 +90,11 @@ class Playerlist {
   }
 
   async fetch () {
-    const uri = `${ip}:${config.minecraft.api.port}/playerlist`;
+    const uri = `${this.ip}:${config.minecraft.api.port}/playerlist`;
 		try {
-			const { statusCode, headers, body} = await request(uri, { method: "GET"	});
-      const data = JSON.parse(body);
+			// const { statusCode, headers, body} = await request(uri, { method: "GET"	});
+      const body = JSON.stringify({ maxplayers: 0, players: [] });
+      const data = JSON.parse(body || "null");
       this.maxplayers = data.maxplayers;
       this._list = data.players;
       await this.display();
