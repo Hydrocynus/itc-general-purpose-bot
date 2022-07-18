@@ -11,27 +11,30 @@ class MCChat {
   async init () {
     const chatcfg = config.minecraft.chat;
 
-    this.channel = await this.client.channels.fetch(plcfg.channelId);
+    this.channel = await this.client.channels.fetch(chatcfg.channelId);
 
-    this.webhook = await this.client.fetchWebhook(plcfg.webhook.id, plcfg.webhook.token);
-    if (!this.webhook) {
-      this.webhook = await channel.createWebhook({ name: "Chat" });
-      plcfg.webhook.id = this.webhook.id;
-      plcfg.webhook.token = this.webhook.token;
+    try {
+      this.webhook = await this.client.fetchWebhook(chatcfg.webhook.id, chatcfg.webhook.token);
+    } catch (e) {
+      this.webhook = await this.channel.createWebhook("Chat");
+      chatcfg.webhook.id = this.webhook.id;
+      chatcfg.webhook.token = this.webhook.token;
     }
 
-    fs.writeFileSync("../config.json", JSON.stringify(config, null, 2));
-    this.fetch();
+    fs.writeFileSync("./config.json", JSON.stringify(config, null, 2));
   }
 
   async add (uid, username, message) {
-    const user = await this.client.users.fetch(uid);
+    if (!this.webhook) await this.init();
+    let member;
+    try { member = await this.channel.guild.members.fetch(uid); }
+    catch (e) { console.error("Error while fetching member, defaulting to transmitted username\n", e) }
     await this.webhook.send({
-      username: user?.username || username,
-      avatarURL: user?.avatarURL(),
+      username: member?.displayName || username,
+      avatarURL: member?.displayAvatarURL(),
       content: message
     });
   }
 }
 
-module.exports = Playerlist;
+module.exports = MCChat;
