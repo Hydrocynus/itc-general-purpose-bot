@@ -1,0 +1,23 @@
+{
+  "general": {
+    "token": "BOT_TOKEN",
+    "clientId": "BOT_CLIENT_ID",
+    "guildId": "DISCORD_SERVER_ID"
+  },
+  "minecraft": {
+    "chat": {
+      "channelId": "ID_OF_CHANNEL_TO_POST_CHAT_MESSAGES_TO",
+      "webhook": { "id": null, "token": null }
+    },
+    "api": {
+      "ip": "URL_TO_MINECRAFT_SERVER",
+      "port": 8082,
+      "mcport": 25565
+    },
+    "playerlist": {
+      "messageId": null,
+      "channelId": "ID_OF_CHANNEL_TO_DISPLAY_PLAYERLIST_IN",
+      "webhook": { "id": null, "token": null }
+    }
+  }
+}
